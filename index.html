@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="philosophy" content="Dharmic Software Architecture - ขับเคลื่อนด้วยความกตัญญูและแสงสว่างแห่งปัญญา">
+    <meta name="author" content="ช่างเบิร์ดโคตรเฟี้ยว">
+    <title>วารีคำนวณ - Bodhi-Panya Engine</title>
+    <style>
+        /* ธีมสมุดร่างแบบ (Architectural Sketchpad) */
+        :root {
+            --paper: #f8fafc;       
+            --pencil: #334155;      
+            --pencil-light: #94a3b8;
+            --marker-blue: #3b82f6; 
+            --marker-red: #ef4444;  
+            --gold-glow: #fbbf24;
+            --grid-color: rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: "Chalkboard SE", "Marker Felt", "Comic Sans MS", sans-serif;
+            background-color: var(--paper); color: var(--pencil);
+            margin: 0; padding: 15px; display: flex; justify-content: center;
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            width: 100%; max-width: 500px; border-radius: 4px; 
+            box-shadow: 4px 6px 0px rgba(0,0,0,0.1); 
+            padding: 20px; box-sizing: border-box; 
+            border: 2px solid var(--pencil); position: relative;
+        }
+
+        .header-box {
+            border-bottom: 2px dashed var(--pencil-light); 
+            padding-bottom: 10px; margin-bottom: 15px; text-align: center;
+        }
+        h2 { margin: 0; font-size: 1.5rem; color: var(--pencil); letter-spacing: 1px; }
+        .sub-h { font-size: 0.85rem; color: var(--marker-blue); font-weight: bold; }
+
+        .canvas-container { 
+            width: 100%; height: 260px; margin-bottom: 20px; 
+            background: transparent; border: 2px solid var(--pencil); 
+            border-radius: 4px; position: relative; overflow: hidden;
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.05);
+        }
+        canvas { width: 100%; height: 100%; touch-action: none; }
+
+        .panel { 
+            background: transparent; padding: 15px; margin-bottom: 20px; 
+            border: 2px dashed var(--pencil-light); border-radius: 4px; 
+        }
+        
+        .control-group { margin-bottom: 15px; }
+        .control-group:last-child { margin-bottom: 0; }
+        .label-box { display: flex; justify-content: space-between; font-size: 1rem; margin-bottom: 8px; font-weight: bold; }
+        
+        input[type="range"] { -webkit-appearance: none; width: 100%; background: transparent; margin: 5px 0; outline: none; }
+        input[type="range"]::-webkit-slider-runnable-track { width: 100%; height: 2px; background: var(--pencil); }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
+            background: var(--paper); cursor: pointer; margin-top: -8px;
+            border: 3px solid var(--pencil); transition: 0.1s;
+        }
+        input[type="range"]::-webkit-slider-thumb:active { transform: scale(1.2); background: var(--pencil); }
+
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .result-box {
+            background: transparent; border: 2px solid var(--pencil);
+            padding: 10px; border-radius: 4px; text-align: center;
+            box-shadow: 2px 3px 0px rgba(0,0,0,0.05);
+        }
+        .res-title { font-size: 0.85rem; color: var(--pencil-light); margin-bottom: 4px; font-weight: bold; }
+        .res-val { font-size: 1.5rem; font-weight: bold; color: var(--pencil); }
+        .res-unit { font-size: 0.8rem; color: var(--marker-blue); font-weight: bold; }
+
+        /* DNA & แก่นแท้ของเอ็นจิ้น */
+        .dna-core {
+            text-align: center; margin-top: 25px; 
+            border-top: 1px dashed var(--pencil-light); padding-top: 15px;
+        }
+        .philosophy {
+            font-size: 1rem; font-weight: bold; color: var(--pencil);
+            margin-bottom: 10px; font-style: italic;
+            text-shadow: 1px 1px 0px rgba(0,0,0,0.05);
+        }
+        
+        /* แอนิเมชันหัวใจเต้นแห่งปัญญา (Heartbeat Glow) */
+        @keyframes bodhi-pulse {
+            0% { text-shadow: 0 0 2px transparent; color: var(--marker-blue); }
+            50% { text-shadow: 0 0 8px var(--gold-glow); color: #0f172a; }
+            100% { text-shadow: 0 0 2px transparent; color: var(--marker-blue); }
+        }
+        .engine-name {
+            font-size: 0.9rem; font-weight: bold;
+            margin-bottom: 5px; cursor: pointer;
+            animation: bodhi-pulse 4s infinite ease-in-out;
+        }
+        .author { font-size: 0.8rem; color: var(--pencil-light); line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-box">
+        <h2>วารีคำนวณ Sketchpad</h2>
+        <div class="sub-h">LAND DRAINAGE & ROAD PROJECT 2-0-64</div>
+    </div>
+
+    <div class="canvas-container"><canvas id="drainCanvas"></canvas></div>
+
+    <div class="panel">
+        <div class="control-group">
+            <div class="label-box"><span>ระดับน้ำ (h)</span><span style="color: var(--marker-blue);"><span id="val-h">0.80</span> m</span></div>
+            <input type="range" id="slide-h" min="0.1" max="1.6" step="0.05" value="0.8">
+        </div>
+        <div class="control-group">
+            <div class="label-box"><span>ความกว้างก้นราง (b)</span><span style="color: var(--marker-blue);"><span id="val-b">1.00</span> m</span></div>
+            <input type="range" id="slide-b" min="0.5" max="3.0" step="0.1" value="1.0">
+        </div>
+        <div class="control-group">
+            <div class="label-box"><span>ความลาดชันพื้นราง (S)</span><span style="color: var(--marker-blue);"><span id="val-s">0.5</span> %</span></div>
+            <input type="range" id="slide-s" min="0.1" max="5.0" step="0.1" value="0.5">
+        </div>
+    </div>
+
+    <div class="result-grid">
+        <div class="result-box">
+            <div class="res-title">อัตราการไหล (Q)</div>
+            <div class="res-val" id="res-q" style="color: var(--marker-blue);">0.00</div>
+            <div class="res-unit">m³ / s</div>
+        </div>
+        <div class="result-box">
+            <div class="res-title">ความเร็วผิวน้ำ (V)</div>
+            <div class="res-val" id="res-v">0.00</div>
+            <div class="res-unit">m / s</div>
+        </div>
+    </div>
+
+    <!-- บล็อกแสดง DNA และปณิธาน -->
+    <div class="dna-core">
+        <div class="philosophy">"สุดยอดของอาจารย์ คืออาจารย์ที่สร้างอาจารย์ได้"</div>
+        <div class="engine-name" onclick="BodhiKernel.revealDNA()">✨ Bodhi-Panya Engine v1.0.0 ✨</div>
+        <div class="author">
+            Dharmic Software Architecture - สถาปัตยกรรมซอฟต์แวร์วิถีพุทธ<br>
+            โดย <strong>ช่างเบิร์ดโคตรเฟี้ยว</strong>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // 🧬 BODHI-PANYA ENGINE DNA (CORE KERNEL)
+    // ==========================================
+    const BodhiKernel = {
+        version: "1.0.0",
+        philosophy: "ฤทธิเดชอาจข่มโลกแต่ดับโศกในใจไม่ได้... หากลืมครูบา ความสง่างามย่อมเลือนหาย",
+        pillars: [
+            "🙏 พระคุณพ่อแม่ผู้ให้กำเนิด", 
+            "🙏 หลวงพ่อฤาษีลิงดำ (แสงสว่างทางธรรม)", 
+            "🙏 แผนกเทคนิคคอมพิวเตอร์ มทร.ล้านนา (รากฐานตรรกะ)", 
+            "🙏 Jimmy Software (สถาปัตยกรรมซอฟต์แวร์)"
+        ],
+        ignite: function() {
+            console.log("%c🌟 Bodhi-Panya Engine Initialized", "color: #fbbf24; font-size: 18px; font-weight: bold;");
+            console.log("%cสถาปัตยกรรมซอฟต์แวร์วิถีพุทธ ที่ขับเคลื่อนด้วยความกตัญญูและแสงสว่างแห่งปัญญา", "color: #3b82f6; font-size: 14px;");
+            console.log("%c" + this.philosophy, "font-style: italic; color: #94a3b8;");
+        },
+        revealDNA: function() {
+            alert(`[ แก่นแท้แห่งเอ็นจิ้นโพธิปัญญา ]\n\n"${this.philosophy}"\n\nขับเคลื่อนและน้อมรำลึกถึง:\n${this.pillars.join('\n')}\n\n-- ช่างเบิร์ดโคตรเฟี้ยว --`);
+        }
+    };
+    
+    // จุดประกายเอ็นจิ้นทันทีที่ระบบเริ่มทำงาน
+    BodhiKernel.ignite();
+    // ==========================================
+
+    const canvas = document.getElementById('drainCanvas'), ctx = canvas.getContext('2d');
+    const slideH = document.getElementById('slide-h'), slideB = document.getElementById('slide-b'), slideS = document.getElementById('slide-s');
+    const valH = document.getElementById('val-h'), valB = document.getElementById('val-b'), valS = document.getElementById('val-s');
+    const resQ = document.getElementById('res-q'), resV = document.getElementById('res-v');
+
+    let animationTime = 0, currentVelocity = 0;
+
+    function setupCanvas() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr); return { w: rect.width, h: rect.height };
+    }
+
+    function calculateHydraulics(b, h, s_percent) {
+        const n = 0.015, S = s_percent / 100, z = 1;
+        const A = (b + z * h) * h, P = b + 2 * h * Math.sqrt(1 + z*z);
+        const R = A / P, V = (1 / n) * Math.pow(R, 2/3) * Math.pow(S, 1/2);
+        return { A, V, Q: A * V, z };
+    }
+
+    function drawSketchLine(x1, y1, x2, y2, color, thickness, overshoot = 12, jitter = 1.5) {
+        ctx.strokeStyle = color; ctx.lineWidth = thickness; ctx.lineCap = 'round';
+        const dx = x2 - x1, dy = y2 - y1, len = Math.sqrt(dx*dx + dy*dy);
+        if (len === 0) return;
+        const ux = dx/len, uy = dy/len;
+
+        ctx.beginPath();
+        for (let i = 0; i < 2; i++) {
+            const rx1 = (Math.random() - 0.5) * jitter, ry1 = (Math.random() - 0.5) * jitter;
+            const rx2 = (Math.random() - 0.5) * jitter, ry2 = (Math.random() - 0.5) * jitter;
+            ctx.moveTo(x1 - ux * overshoot + rx1, y1 - uy * overshoot + ry1);
+            ctx.lineTo(x2 + ux * overshoot + rx2, y2 + uy * overshoot + ry2);
+        }
+        ctx.stroke();
+    }
+
+    function project3D(x, y, z, cx, cy, fov = 400) {
+        const scale = fov / (fov + z); return { x: cx + x * scale, y: cy + y * scale, s: scale };
+    }
+
+    function renderFrame() {
+        const { w, h } = setupCanvas();
+        ctx.clearRect(0, 0, w, h);
+
+        const css = (name) => getComputedStyle(document.body).getPropertyValue(name).trim();
+        const cPencil = css('--pencil'), cPencilLight = css('--pencil-light');
+        const cMarkerBlue = css('--marker-blue'), cMarkerRed = css('--marker-red');
+
+        const b = parseFloat(slideB.value), waterH = parseFloat(slideH.value);
+        const cx = w / 2, cy = h / 2 - 20; 
+        const ditchDepth = 1.5, scale2D = 50, zFront = 50, zBack = 600; 
+        const isOverflow = waterH >= ditchDepth;
+        const fillWater = isOverflow ? 'rgba(239, 68, 68, 0.15)' : 'rgba(59, 130, 246, 0.15)';
+        const lineWater = isOverflow ? cMarkerRed : cMarkerBlue;
+        
+        function getDPoints(z) {
+            return {
+                tl: project3D(-(b/2 + ditchDepth)*scale2D, 0, z, cx, cy), tr: project3D((b/2 + ditchDepth)*scale2D, 0, z, cx, cy),
+                bl: project3D(-(b/2)*scale2D, ditchDepth*scale2D, z, cx, cy), br: project3D((b/2)*scale2D, ditchDepth*scale2D, z, cx, cy)
+            };
+        }
+        function getWPoints(z, wh) {
+            return {
+                wl: project3D(-(b/2 + wh)*scale2D, (ditchDepth - wh)*scale2D, z, cx, cy),
+                wr: project3D((b/2 + wh)*scale2D, (ditchDepth - wh)*scale2D, z, cx, cy)
+            };
+        }
+
+        const front = getDPoints(zFront), back = getDPoints(zBack);
+        const wFront = getWPoints(zFront, isOverflow ? ditchDepth : waterH);
+        const wBack = getWPoints(zBack, isOverflow ? ditchDepth : waterH);
+
+        // Grid
+        ctx.strokeStyle = 'rgba(0,0,0,0.05)'; ctx.lineWidth = 1; ctx.beginPath();
+        for(let i = -3; i <= 3; i++) {
+            let pF = project3D(i*50, 0, zFront, cx, cy), pB = project3D(i*50, 0, zBack, cx, cy);
+            ctx.moveTo(pF.x, pF.y); ctx.lineTo(pB.x, pB.y);
+        }
+        for(let j = 1; j <= 5; j++) {
+            let zG = zFront + j*100, gL = project3D(-200, 0, zG, cx, cy), gR = project3D(200, 0, zG, cx, cy);
+            ctx.moveTo(gL.x, gL.y); ctx.lineTo(gR.x, gR.y);
+        }
+        ctx.stroke();
+
+        // Water
+        ctx.fillStyle = fillWater; ctx.beginPath();
+        ctx.moveTo(wFront.wl.x, wFront.wl.y); ctx.lineTo(wFront.wr.x, wFront.wr.y);
+        ctx.lineTo(wBack.wr.x, wBack.wr.y); ctx.lineTo(wBack.wl.x, wBack.wl.y); ctx.fill();
+
+        // Lines
+        drawSketchLine(back.tl.x, back.tl.y, back.bl.x, back.bl.y, cPencilLight, 1, 8);
+        drawSketchLine(back.bl.x, back.bl.y, back.br.x, back.br.y, cPencilLight, 1, 8);
+        drawSketchLine(back.br.x, back.br.y, back.tr.x, back.tr.y, cPencilLight, 1, 8);
+        
+        drawSketchLine(front.tl.x, front.tl.y, back.tl.x, back.tl.y, cPencil, 1, 5);
+        drawSketchLine(front.bl.x, front.bl.y, back.bl.x, back.bl.y, cPencil, 1, 5);
+        drawSketchLine(front.br.x, front.br.y, back.br.x, back.br.y, cPencil, 1, 5);
+        drawSketchLine(front.tr.x, front.tr.y, back.tr.x, back.tr.y, cPencil, 1, 5);
+
+        // Flow
+        animationTime += currentVelocity * 5; 
+        for(let i = 0; i < 4; i++) {
+            let oZ = ((animationTime + (i * 150)) % 600) + zFront;
+            let fL = getWPoints(oZ, isOverflow ? ditchDepth : waterH), fT = getWPoints(oZ + 40, isOverflow ? ditchDepth : waterH); 
+            drawSketchLine(fL.wl.x + (fL.wr.x - fL.wl.x)*0.5, fL.wl.y, fT.wl.x + (fT.wr.x - fT.wl.x)*0.5, fT.wl.y, lineWater, 1.5, 0, 0);
+            drawSketchLine(fL.wl.x + (fL.wr.x - fL.wl.x)*0.2, fL.wl.y, fT.wl.x + (fT.wr.x - fT.wl.x)*0.2, fT.wl.y, lineWater, 1, 0, 0);
+            drawSketchLine(fL.wl.x + (fL.wr.x - fL.wl.x)*0.8, fL.wl.y, fT.wl.x + (fT.wr.x - fT.wl.x)*0.8, fT.wl.y, lineWater, 1, 0, 0);
+        }
+
+        drawSketchLine(wFront.wl.x, wFront.wl.y, wFront.wr.x, wFront.wr.y, lineWater, 2);
+        drawSketchLine(wFront.wl.x, wFront.wl.y, wBack.wl.x, wBack.wl.y, lineWater, 1);
+        drawSketchLine(wFront.wr.x, wFront.wr.y, wBack.wr.x, wBack.wr.y, lineWater, 1);
+
+        drawSketchLine(front.tl.x - 20, front.tl.y, front.tl.x, front.tl.y, cPencil, 2);
+        drawSketchLine(front.tr.x, front.tr.y, front.tr.x + 20, front.tr.y, cPencil, 2);
+        drawSketchLine(front.tl.x, front.tl.y, front.bl.x, front.bl.y, cPencil, 2.5);
+        drawSketchLine(front.bl.x, front.bl.y, front.br.x, front.br.y, cPencil, 2.5);
+        drawSketchLine(front.br.x, front.br.y, front.tr.x, front.tr.y, cPencil, 2.5);
+
+        ctx.font = '14px "Chalkboard SE", "Marker Felt", "Comic Sans MS", sans-serif'; 
+        ctx.fillStyle = cPencilLight; ctx.textAlign = 'center';
+        drawSketchLine(front.bl.x, front.bl.y + 15, front.br.x, front.br.y + 15, cPencilLight, 1, 5, 0);
+        ctx.fillText(`b = ${b.toFixed(2)}m`, front.bl.x + (front.br.x - front.bl.x)/2, front.bl.y + 35);
+        
+        ctx.textAlign = 'right';
+        drawSketchLine(front.bl.x - 15, front.bl.y, wFront.wl.x - 15, wFront.wl.y, cPencilLight, 1, 5, 0);
+        ctx.fillText(`h = ${waterH.toFixed(2)}`, wFront.wl.x - 25, wFront.wl.y + (front.bl.y - wFront.wl.y)/2 + 4);
+
+        if(isOverflow) {
+            ctx.fillStyle = cMarkerRed; ctx.font = 'bold 16px "Chalkboard SE", "Marker Felt", sans-serif'; 
+            ctx.textAlign = 'center'; ctx.fillText("⚠️ OVERFLOW!", cx, front.tl.y - 15);
+        }
+
+        requestAnimationFrame(renderFrame); 
+    }
+
+    function updateValues() {
+        const b = parseFloat(slideB.value), h = parseFloat(slideH.value), s = parseFloat(slideS.value);
+        valB.textContent = b.toFixed(2); valH.textContent = h.toFixed(2); valS.textContent = s.toFixed(1);
+        const hydro = calculateHydraulics(b, h, s);
+        currentVelocity = hydro.V; 
+        resQ.textContent = hydro.Q.toFixed(3); resV.textContent = hydro.V.toFixed(2);
+        const css = (name) => getComputedStyle(document.body).getPropertyValue(name).trim();
+        resQ.style.color = (h >= 1.5) ? css('--marker-red') : css('--marker-blue');
+    }
+
+    slideB.addEventListener('input', updateValues); slideH.addEventListener('input', updateValues); slideS.addEventListener('input', updateValues);
+    setTimeout(() => { updateValues(); renderFrame(); }, 100);
+</script>
+
+</body>
+</html>
