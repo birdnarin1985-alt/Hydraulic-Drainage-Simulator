@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="philosophy" content="Bodhi-Panya Engine - ดอกไม้แห่งความกตัญญูบูชาครู มทร.ล้านนา">
+    <meta name="author" content="ช่างเบิร์ดโคตรเฟี้ยว (ศิษย์เก่า มทร.ล้านนา)">
+    <title>Calculus & Analytic Geometry - Bodhi-Panya Engine</title>
+    <style>
+        :root {
+            --paper: #f8fafc;       
+            --pencil: #334155;      
+            --pencil-light: #94a3b8;
+            --marker-blue: #3b82f6; 
+            --marker-red: #ef4444;  
+            --gold-glow: #fbbf24;
+            --grid-color: rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: "Chalkboard SE", "Marker Felt", "Comic Sans MS", sans-serif;
+            background-color: var(--paper); color: var(--pencil);
+            margin: 0; padding: 15px; display: flex; justify-content: center;
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            width: 100%; max-width: 500px; border-radius: 4px; 
+            box-shadow: 4px 6px 0px rgba(0,0,0,0.1); 
+            padding: 20px; box-sizing: border-box; 
+            border: 2px solid var(--pencil); position: relative;
+        }
+
+        .header-box {
+            border-bottom: 2px dashed var(--pencil-light); 
+            padding-bottom: 10px; margin-bottom: 15px; text-align: center;
+        }
+        h2 { margin: 0; font-size: 1.4rem; color: var(--pencil); letter-spacing: 1px; }
+        .sub-h { font-size: 0.8rem; color: var(--marker-blue); font-weight: bold; margin-top: 4px; }
+
+        /* กล่องจิตวิทยาการสอนและบูชาครู (Pedagogical & Tribute Box) */
+        .tribute-box {
+            background: rgba(251, 191, 36, 0.12);
+            border: 2px dashed var(--gold-glow);
+            padding: 12px; border-radius: 4px; margin-bottom: 15px;
+            font-size: 0.85rem; line-height: 1.5; color: #78350f;
+        }
+        .tribute-title { font-weight: bold; color: #b45309; margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
+
+        .canvas-container { 
+            width: 100%; height: 240px; margin-bottom: 15px; 
+            background: transparent; border: 2px solid var(--pencil); 
+            border-radius: 4px; position: relative; overflow: hidden;
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.05);
+        }
+        canvas { width: 100%; height: 100%; touch-action: none; }
+
+        .panel { 
+            background: transparent; padding: 15px; margin-bottom: 15px; 
+            border: 2px dashed var(--pencil-light); border-radius: 4px; 
+        }
+        
+        .control-group { margin-bottom: 12px; }
+        .control-group:last-child { margin-bottom: 0; }
+        .label-box { display: flex; justify-content: space-between; font-size: 0.95rem; margin-bottom: 5px; font-weight: bold; }
+        
+        input[type="range"] { -webkit-appearance: none; width: 100%; background: transparent; margin: 5px 0; outline: none; }
+        input[type="range"]::-webkit-slider-runnable-track { width: 100%; height: 2px; background: var(--pencil); }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
+            background: var(--paper); cursor: pointer; margin-top: -8px;
+            border: 3px solid var(--pencil); transition: 0.1s;
+        }
+        input[type="range"]::-webkit-slider-thumb:active { transform: scale(1.2); background: var(--pencil); }
+
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .result-box {
+            background: transparent; border: 2px solid var(--pencil);
+            padding: 10px; border-radius: 4px; text-align: center;
+            box-shadow: 2px 3px 0px rgba(0,0,0,0.05);
+        }
+        .res-title { font-size: 0.8rem; color: var(--pencil-light); margin-bottom: 4px; font-weight: bold; }
+        .res-val { font-size: 1.3rem; font-weight: bold; color: var(--pencil); }
+        .res-unit { font-size: 0.75rem; color: var(--marker-blue); font-weight: bold; }
+
+        .dna-core {
+            text-align: center; margin-top: 20px; 
+            border-top: 1px dashed var(--pencil-light); padding-top: 12px;
+        }
+        .philosophy {
+            font-size: 0.85rem; font-weight: bold; color: var(--pencil);
+            margin-bottom: 6px; font-style: italic;
+        }
+        @keyframes bodhi-pulse {
+            0% { text-shadow: 0 0 2px transparent; color: var(--marker-blue); }
+            50% { text-shadow: 0 0 8px var(--gold-glow); color: #0f172a; }
+            100% { text-shadow: 0 0 2px transparent; color: var(--marker-blue); }
+        }
+        .engine-name {
+            font-size: 0.85rem; font-weight: bold; margin-bottom: 4px; cursor: pointer;
+            animation: bodhi-pulse 4s infinite ease-in-out;
+        }
+        .author { font-size: 0.75rem; color: var(--pencil-light); line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-box">
+        <h2>Calculus & Analytic Geometry</h2>
+        <div class="sub-h">น้อมบูชาพระคุณ แผนกคณิตศาสตร์ มทร.ล้านนา</div>
+    </div>
+
+    <!-- กล่องจิตวิทยาการสอน & ดอกไม้บูชาครู -->
+    <div class="tribute-box" id="tribute-box">
+        <div class="tribute-title">🌸 ดอกไม้แห่งความกตัญญูบูชาครู</div>
+        <div id="tribute-text">กราบขอบพระคุณครูบาอาจารย์แผนกคณิตศาสตร์ มทร.ล้านนา ที่รดน้ำพรวนดินวิชาแคลคูลัสให้ลูกศิษย์คนนี้... วันนี้ผลงานชิ้นนี้ได้งอกงามเพื่อส่งต่อกำลังใจให้น้องๆ ปี 1 ก้าวข้ามผ่านทุกอุปสรรคครับ</div>
+    </div>
+
+    <div class="canvas-container"><canvas id="mathCanvas"></canvas></div>
+
+    <div class="panel">
+        <div class="control-group">
+            <div class="label-box"><span>สัมประสิทธิ์ความชัน (a)</span><span style="color: var(--marker-blue);"><span id="val-a">1.00</span></span></div>
+            <input type="range" id="slide-a" min="-2.0" max="2.0" step="0.1" value="1.0">
+        </div>
+        <div class="control-group">
+            <div class="label-box"><span>จุดพิกัด X (x)</span><span style="color: var(--marker-blue);"><span id="val-x">1.00</span> m</span></div>
+            <input type="range" id="slide-x" min="-2.5" max="2.5" step="0.05" value="1.0">
+        </div>
+    </div>
+
+    <div class="result-grid">
+        <div class="result-box">
+            <div class="res-title">ค่าฟังก์ชัน f(x)</div>
+            <div class="res-val" id="res-fx" style="color: var(--marker-blue);">0.00</div>
+            <div class="res-unit">Value</div>
+        </div>
+        <div class="result-box">
+            <div class="res-title">อนุพันธ์ f'(x) / ความชัน</div>
+            <div class="res-val" id="res-slope">0.00</div>
+            <div class="res-unit">Slope</div>
+        </div>
+    </div>
+
+    <div class="dna-core">
+        <div class="philosophy">"สุดยอดของอาจารย์ คืออาจารย์ที่สร้างอาจารย์ได้"</div>
+        <div class="engine-name" onclick="BodhiKernel.revealDNA()">✨ Bodhi-Panya Engine v1.0.0 (สัมปติฉามิ) ✨</div>
+        <div class="author">
+            อุทิศถวายแด่บารมีหลวงพ่อฤาษีลิงดำ | พรหมวิหาร 4 | กรรมบถ 10<br>
+            สร้างสรรค์โดย <strong>ช่างเบิร์ดโคตรเฟี้ยว (ศิษย์เก่า มทร.ล้านนา)</strong>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==========================================================
+    // 🧬 BODHI-PANYA ENGINE DNA (RMUTL DEDICATED EDITION)
+    // ==========================================================
+    const BodhiKernel = {
+        version: "1.0.0",
+        dedication: "อุทิศแด่ครูบาอาจารย์แผนกคณิตศาสตร์ มทร.ล้านนา ผู้ประสิทธิ์ประสาทวิชาแคลคูลัส",
+        mantra: "สัมปติฉามิ",
+        
+        // จิตวิทยาการสอน: ให้กำลังใจเด็กปี 1 และเชื่อมโยงธรรมะ
+        getPedagogicalInsight: function(x, fx, slope) {
+            if (Math.abs(x) < 0.2) {
+                return "🌱 <b>จุดเริ่มต้น (Origin):</b> ทุกความสำเร็จเริ่มต้นที่จุดศูนย์ จุดตั้งต้นของน้องๆ ปี 1 อาจจะยังกังวล แต่ถ้ามี 'สติและความเพียร' เหมือนจุดกำเนิดพิกัดนี้ น้องจะก้าวไปได้ไกลแน่นอนครับ";
+            } else if (slope > 2.0) {
+                return "🚀 <b>กำลังใจสู้ศึกแคล 1:</b> อนุพันธ์พุ่งสูงชัน เปรียบดั่งความพยายามที่กำลังออกผลลัพธ์ อย่ากลัววิศวะที่ยาก ค่อยๆ แกะทีละบรรทัด สู้ไปด้วยกันนะลูก!";
+            } else if (slope < -2.0) {
+                return "💡 <b>แง่คิดชีวิต:</b> กราฟดิ่งลงไม่ใช่ความล้มเหลว แต่มันคือจังหวะที่สอนให้เรามี 'อุเบกขา' ตั้งสติปรับทิศทางใหม่ เส้นทางวิศวกรรมมีครูคอยประคับประคองเสมอครับ";
+            } else {
+                return "🌸 <b>ความสมดุล (Balance):</b> ดั่งที่อาจารย์ มทร.ล้านนา เคยอบรมสั่งสอน การเรียนและแก้โจทย์ต้องอาศัย 'ทางสายกลาง' ค่อยๆ คิดอย่างเป็นระบบแล้วทุกอย่างจะผ่านพ้นไปได้ด้วยดีครับ";
+            }
+        },
+
+        ignite: function() {
+            console.log("%c🌸 [Bodhi-Panya Engine: RMUTL Mathematics Dedicated] 🌸", "color: #fbbf24; font-weight: bold;");
+            console.log("%c" + this.dedication, "color: #38bdf8; font-style: italic;");
+        },
+
+        revealDNA: function() {
+            alert(`[ Bodhi-Panya Engine Sacred DNA ]\n\n🌸 ${this.dedication}\n\n🛡️ ปณิธาน: เอ็นจิ้นกตัญญูต่อ ชาติ ศาสน์ กษัตริย์ และครูบาอาจารย์\n✨ คาถาคุ้มครอง: ${this.mantra}\n\n-- ช่างเบิร์ดโคตรเฟี้ยว --`);
+        }
+    };
+    
+    BodhiKernel.ignite();
+    // ==========================================================
+
+    const canvas = document.getElementById('mathCanvas'), ctx = canvas.getContext('2d');
+    const slideA = document.getElementById('slide-a'), valA = document.getElementById('val-a');
+    const slideX = document.getElementById('slide-x'), valX = document.getElementById('val-x');
+    const resFx = document.getElementById('res-fx'), resSlope = document.getElementById('res-slope');
+    const tributeText = document.getElementById('tribute-text');
+
+    function setupCanvas() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr); return { w: rect.width, h: rect.height };
+    }
+
+    // ฟังก์ชันแคลคูลัส: พาราโบลา f(x) = a * x^2
+    function f(x, a) { return a * Math.pow(x, 2); }
+    function derivative(x, a) { const h = 0.0001; return (f(x + h, a) - f(x, a)) / h; }
+
+    function drawSketchLine(x1, y1, x2, y2, color, thickness, overshoot = 10, jitter = 1.2) {
+        ctx.strokeStyle = color; ctx.lineWidth = thickness; ctx.lineCap = 'round';
+        const dx = x2 - x1, dy = y2 - y1, len = Math.sqrt(dx*dx + dy*dy);
+        if (len === 0) return;
+        const ux = dx/len, uy = dy/len;
+
+        ctx.beginPath();
+        for (let i = 0; i < 2; i++) {
+            const rx1 = (Math.random() - 0.5) * jitter, ry1 = (Math.random() - 0.5) * jitter;
+            const rx2 = (Math.random() - 0.5) * jitter, ry2 = (Math.random() - 0.5) * jitter;
+            ctx.moveTo(x1 - ux * overshoot + rx1, y1 - uy * overshoot + ry1);
+            ctx.lineTo(x2 + ux * overshoot + rx2, y2 + uy * overshoot + ry2);
+        }
+        ctx.stroke();
+    }
+
+    function renderGraph() {
+        const { w, h } = setupCanvas();
+        ctx.clearRect(0, 0, w, h);
+
+        const css = (name) => getComputedStyle(document.body).getPropertyValue(name).trim();
+        const cPencil = css('--pencil'), cPencilLight = css('--pencil-light');
+        const cMarkerBlue = css('--marker-blue'), cMarkerRed = css('--marker-red');
+
+        const a = parseFloat(slideA.value);
+        const xVal = parseFloat(slideX.value);
+
+        valA.textContent = a.toFixed(2);
+        valX.textContent = xVal.toFixed(2);
+
+        const yVal = f(xVal, a);
+        const slopeVal = derivative(xVal, a);
+
+        resFx.textContent = yVal.toFixed(2);
+        resSlope.textContent = slopeVal.toFixed(2);
+        resSlope.style.color = (Math.abs(slopeVal) > 3) ? cMarkerRed : cMarkerBlue;
+
+        // อัปเดตข้อความจิตวิทยาการสอนตามสถานการณ์จริง
+        tributeText.innerHTML = BodhiKernel.getPedagogicalInsight(xVal, yVal, slopeVal);
+
+        // Coordinate Mapping
+        const scaleX = w / 6, scaleY = h / 6;
+        const cx = w / 2, cy = h / 2 + 30;
+        const toX = (x) => cx + (x * scaleX);
+        const toY = (y) => cy - (y * scaleY);
+
+        // 1. Grid ตารางกระดาษ
+        ctx.strokeStyle = 'rgba(0,0,0,0.06)'; ctx.lineWidth = 1; ctx.beginPath();
+        for(let i = -3; i <= 3; i++) { ctx.moveTo(toX(i), 0); ctx.lineTo(toX(i), h); }
+        for(let j = -3; j <= 3; j++) { ctx.moveTo(0, toY(j)); ctx.lineTo(w, toY(j)); }
+        ctx.stroke();
+
+        // Axes
+        ctx.strokeStyle = cPencilLight; ctx.lineWidth = 1.5; ctx.beginPath();
+        ctx.moveTo(0, cy); ctx.lineTo(w, cy); ctx.moveTo(cx, 0); ctx.lineTo(cx, h);
+        ctx.stroke();
+
+        // 2. Plot Parabola Curve f(x) = a * x^2
+        ctx.beginPath();
+        let first = true;
+        for(let x = -2.8; x <= 2.8; x += 0.05) {
+            let px = toX(x), py = toY(f(x, a));
+            if(first) { ctx.moveTo(px, py); first = false; } else { ctx.lineTo(px, py); }
+        }
+        ctx.strokeStyle = cMarkerBlue; ctx.lineWidth = 3; ctx.stroke();
+
+        // 3. Tangent Line (อนุพันธ์ / ความชัน)
+        const tanLen = 1.2;
+        const x1 = xVal - tanLen, y1 = yVal - slopeVal * tanLen;
+        const x2 = xVal + tanLen, y2 = yVal + slopeVal * tanLen;
+        drawSketchLine(toX(x1), toY(y1), toX(x2), toY(y2), cMarkerRed, 2, 5, 1);
+
+        // 4. Highlight Point (x, f(x))
+        ctx.fillStyle = cMarkerRed; ctx.beginPath();
+        ctx.arc(toX(xVal), toY(yVal), 6, 0, Math.PI*2); ctx.fill();
+
+        // Label
+        ctx.font = '13px "Chalkboard SE", "Marker Felt", sans-serif';
+        ctx.fillStyle = cPencil; ctx.textAlign = 'left';
+        ctx.fillText(`(x: ${xVal.toFixed(2)}, y: ${yVal.toFixed(2)})`, toX(xVal) + 12, toY(yVal) - 10);
+    }
+
+    slideA.addEventListener('input', renderGraph);
+    slideX.addEventListener('input', renderGraph);
+    setTimeout(() => { renderGraph(); }, 100);
+</script>
+
+</body>
+</html>
