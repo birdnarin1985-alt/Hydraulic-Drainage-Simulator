@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>วารีคำนวณ 3D Sketch by ช่างเบิร์ด</title>
+    <style>
+        :root {
+            --bg: #0f172a; --card: #1e3a8a; --border: #3b82f6;
+            --text: #eff6ff; --accent: #38bdf8; --danger: #f87171;
+            --sketch-white: rgba(255, 255, 255, 0.8);
+            --sketch-blue: rgba(56, 189, 248, 0.7);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background-color: var(--bg); color: var(--text);
+            margin: 0; padding: 15px; display: flex; justify-content: center;
+        }
+        .container {
+            background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+            width: 100%; max-width: 500px;
+            border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            padding: 20px; box-sizing: border-box; border: 2px solid var(--border);
+        }
+        .header-box {
+            border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-bottom: 15px; text-align: center;
+        }
+        h2 { margin: 0; font-size: 1.4rem; color: #fff; letter-spacing: 1px; }
+        .sub-h { font-size: 0.8rem; color: var(--accent); font-weight: bold; }
+
+        .canvas-container { 
+            width: 100%; height: 260px; margin-bottom: 15px; 
+            background: #0b1120; border: 2px solid var(--border); border-radius: 8px;
+            position: relative; overflow: hidden;
+        }
+        canvas { width: 100%; height: 100%; touch-action: none; }
+
+        .panel { background: rgba(0, 0, 0, 0.4); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1); }
+        .control-group { margin-bottom: 12px; }
+        .control-group:last-child { margin-bottom: 0; }
+        .label-box { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px; font-weight: bold; }
+        
+        input[type="range"] { -webkit-appearance: none; width: 100%; background: transparent; margin: 5px 0; }
+        input[type="range"]::-webkit-slider-runnable-track { width: 100%; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.2); }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%;
+            background: var(--accent); cursor: pointer; margin-top: -7px;
+            box-shadow: 0 0 10px var(--accent); border: 2px solid #fff;
+        }
+
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .result-box {
+            background: rgba(0, 0, 0, 0.5); border: 1px dashed var(--accent);
+            padding: 10px; border-radius: 8px; text-align: center;
+        }
+        .res-title { font-size: 0.75rem; color: #94a3b8; margin-bottom: 4px; }
+        .res-val { font-size: 1.4rem; font-weight: bold; color: #fff; }
+        .res-unit { font-size: 0.75rem; color: var(--accent); }
+
+        .credit {
+            font-size: 0.75rem; text-align: center; color: #cbd5e1;
+            margin-top: 20px; border-top: 1px dashed var(--border); padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-box">
+        <h2>วารีคำนวณ 3D Sketch</h2>
+        <div class="sub-h">LAND DRAINAGE & ROAD PROJECT 2-0-64</div>
+    </div>
+
+    <div class="canvas-container"><canvas id="drainCanvas"></canvas></div>
+
+    <div class="panel">
+        <div class="control-group">
+            <div class="label-box"><span>ระดับน้ำ (h)</span><span style="color: var(--accent);"><span id="val-h">0.80</span> m</span></div>
+            <input type="range" id="slide-h" min="0.1" max="1.6" step="0.05" value="0.8">
+        </div>
+        <div class="control-group">
+            <div class="label-box"><span>ความกว้างก้นราง (b)</span><span style="color: var(--accent);"><span id="val-b">1.00</span> m</span></div>
+            <input type="range" id="slide-b" min="0.5" max="3.0" step="0.1" value="1.0">
+        </div>
+        <div class="control-group">
+            <div class="label-box"><span>ความลาดชันพื้นราง (Slope)</span><span style="color: var(--accent);"><span id="val-s">0.5</span> %</span></div>
+            <input type="range" id="slide-s" min="0.1" max="5.0" step="0.1" value="0.5">
+        </div>
+    </div>
+
+    <div class="result-grid">
+        <div class="result-box">
+            <div class="res-title">อัตราการไหล (Q)</div>
+            <div class="res-val" id="res-q" style="color: var(--accent);">0.00</div>
+            <div class="res-unit">m³ / s</div>
+        </div>
+        <div class="result-box">
+            <div class="res-title">ความเร็วผิวน้ำ (V)</div>
+            <div class="res-val" id="res-v">0.00</div>
+            <div class="res-unit">m / s</div>
+        </div>
+    </div>
+
+    <div class="credit">
+        สถาปัตยกรรม <strong>Tri-Core Meta-Engine</strong> (Perspective Sketch)<br>
+        ออกแบบโดย <strong>ช่างเบิร์ดโคตรเฟี้ยว</strong>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('drainCanvas'), ctx = canvas.getContext('2d');
+    const slideH = document.getElementById('slide-h'), valH = document.getElementById('val-h');
+    const slideB = document.getElementById('slide-b'), valB = document.getElementById('val-b');
+    const slideS = document.getElementById('slide-s'), valS = document.getElementById('val-s');
+    const resQ = document.getElementById('res-q'), resV = document.getElementById('res-v');
+
+    let animationTime = 0;
+    let currentVelocity = 0;
+
+    function setupCanvas() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr); 
+        return { w: rect.width, h: rect.height };
+    }
+
+    // ฟังก์ชันคำนวณ Manning's Equation
+    function calculateHydraulics(b, h, s_percent) {
+        const n = 0.015, S = s_percent / 100, z = 1;
+        const A = (b + z * h) * h;
+        const P = b + 2 * h * Math.sqrt(1 + z*z);
+        const R = A / P;
+        const V = (1 / n) * Math.pow(R, 2/3) * Math.pow(S, 1/2);
+        return { A, V, Q: A * V, z };
+    }
+
+    // เครื่องมือวาดเส้นสเก็ตช์สถาปัตย์ (Architectural Sketch Engine)
+    function drawSketchLine(x1, y1, x2, y2, color, thickness, overshoot = 15, jitter = 2) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = thickness;
+        ctx.lineCap = 'round';
+        
+        // คำนวณเวกเตอร์ทิศทางเพื่อทำ Overshoot (เส้นทะลุจุดตัด)
+        const dx = x2 - x1, dy = y2 - y1;
+        const len = Math.sqrt(dx*dx + dy*dy);
+        if (len === 0) return;
+        const ux = dx/len, uy = dy/len;
+
+        // ซ้อนเส้น 2 รอบให้ดูเหมือนวาดมือ (Rough Sketch)
+        ctx.beginPath();
+        for (let i = 0; i < 2; i++) {
+            const rx1 = (Math.random() - 0.5) * jitter;
+            const ry1 = (Math.random() - 0.5) * jitter;
+            const rx2 = (Math.random() - 0.5) * jitter;
+            const ry2 = (Math.random() - 0.5) * jitter;
+            
+            ctx.moveTo(x1 - ux * overshoot + rx1, y1 - uy * overshoot + ry1);
+            ctx.lineTo(x2 + ux * overshoot + rx2, y2 + uy * overshoot + ry2);
+        }
+        ctx.stroke();
+    }
+
+    // ระบบ 3D Projection (1-Point Perspective)
+    function project3D(x, y, z, cx, cy, fov = 400) {
+        const scale = fov / (fov + z);
+        return {
+            x: cx + x * scale,
+            y: cy + y * scale,
+            s: scale
+        };
+    }
+
+    function renderFrame() {
+        const { w, h } = setupCanvas();
+        ctx.clearRect(0, 0, w, h);
+
+        const b = parseFloat(slideB.value);
+        const waterH = parseFloat(slideH.value);
+        
+        // Vanishing point (จุดรวมสายตา) และพิกัด 3D
+        const cx = w / 2, cy = h / 2 - 40; 
+        const ditchDepth = 1.5;
+        const zSlope = 1; // Side slope (1:1)
+        const scale2D = 50; // ตัวคูณขนาด
+        
+        const zFront = 50; // ระนาบหน้า
+        const zBack = 600; // ระนาบหลัง (ความลึก)
+
+        const isOverflow = waterH >= ditchDepth;
+        const colorLine = 'rgba(255, 255, 255, 0.7)';
+        const colorWaterLine = isOverflow ? 'rgba(248, 113, 113, 0.8)' : 'rgba(56, 189, 248, 0.8)';
+        
+        // คำนวณจุดตัด Cross-section (หน้าและหลัง)
+        function getDitchPoints(z) {
+            const yBot = ditchDepth * scale2D;
+            const yTop = 0;
+            const wBot = (b * scale2D) / 2;
+            const wTop = wBot + (zSlope * ditchDepth * scale2D);
+            
+            return {
+                tl: project3D(-wTop, yTop, z, cx, cy),
+                tr: project3D(wTop, yTop, z, cx, cy),
+                bl: project3D(-wBot, yBot, z, cx, cy),
+                br: project3D(wBot, yBot, z, cx, cy)
+            };
+        }
+
+        function getWaterPoints(z, wh) {
+            const yWat = (ditchDepth - wh) * scale2D;
+            const wWat = (b * scale2D) / 2 + (zSlope * wh * scale2D);
+            return {
+                wl: project3D(-wWat, yWat, z, cx, cy),
+                wr: project3D(wWat, yWat, z, cx, cy)
+            };
+        }
+
+        const front = getDitchPoints(zFront);
+        const back = getDitchPoints(zBack);
+        const wFront = getWaterPoints(zFront, isOverflow ? ditchDepth : waterH);
+        const wBack = getWaterPoints(zBack, isOverflow ? ditchDepth : waterH);
+
+        // 1. วาด Perspective Grid พื้นหลัง
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for(let i = -3; i <= 3; i++) {
+            let pFront = project3D(i * 50, 0, zFront, cx, cy);
+            let pBack = project3D(i * 50, 0, zBack, cx, cy);
+            ctx.moveTo(pFront.x, pFront.y); ctx.lineTo(pBack.x, pBack.y);
+        }
+        for(let j = 1; j <= 5; j++) {
+            let zGrid = zFront + j*100;
+            let gL = project3D(-200, 0, zGrid, cx, cy);
+            let gR = project3D(200, 0, zGrid, cx, cy);
+            ctx.moveTo(gL.x, gL.y); ctx.lineTo(gR.x, gR.y);
+        }
+        ctx.stroke();
+
+        // 2. วาดสีผิวน้ำ (Fill)
+        ctx.fillStyle = isOverflow ? 'rgba(248, 113, 113, 0.2)' : 'rgba(56, 189, 248, 0.2)';
+        ctx.beginPath();
+        ctx.moveTo(wFront.wl.x, wFront.wl.y); ctx.lineTo(wFront.wr.x, wFront.wr.y);
+        ctx.lineTo(wBack.wr.x, wBack.wr.y); ctx.lineTo(wBack.wl.x, wBack.wl.y);
+        ctx.fill();
+
+        // 3. วาดเส้นสเก็ตช์ร่องน้ำ (ขอบหลังและเส้นลึก Perspective)
+        drawSketchLine(back.tl.x, back.tl.y, back.bl.x, back.bl.y, 'rgba(255,255,255,0.3)', 1, 10);
+        drawSketchLine(back.bl.x, back.bl.y, back.br.x, back.br.y, 'rgba(255,255,255,0.3)', 1, 10);
+        drawSketchLine(back.br.x, back.br.y, back.tr.x, back.tr.y, 'rgba(255,255,255,0.3)', 1, 10);
+
+        drawSketchLine(front.tl.x, front.tl.y, back.tl.x, back.tl.y, colorLine, 1.5, 5);
+        drawSketchLine(front.bl.x, front.bl.y, back.bl.x, back.bl.y, colorLine, 1.5, 5);
+        drawSketchLine(front.br.x, front.br.y, back.br.x, back.br.y, colorLine, 1.5, 5);
+        drawSketchLine(front.tr.x, front.tr.y, back.tr.x, back.tr.y, colorLine, 1.5, 5);
+
+        // 4. เส้นกระแสน้ำไหล (Animated Flow Lines)
+        const numFlowLines = 4;
+        animationTime += currentVelocity * 5; // ความเร็วของแอนิเมชันแปรผันตาม V
+        for(let i = 0; i < numFlowLines; i++) {
+            let offsetZ = ((animationTime + (i * 150)) % 600) + zFront;
+            let fL = getWaterPoints(offsetZ, isOverflow ? ditchDepth : waterH);
+            let fL_tail = getWaterPoints(offsetZ + 40, isOverflow ? ditchDepth : waterH); // หางกระแสน้ำ
+            
+            // วาดลูกศรกระแสน้ำพุ่งมาข้างหน้า
+            drawSketchLine(fL.wl.x + (fL.wr.x - fL.wl.x)*0.5, fL.wl.y, fL_tail.wl.x + (fL_tail.wr.x - fL_tail.wl.x)*0.5, fL_tail.wl.y, colorWaterLine, 1.5, 0, 0);
+            drawSketchLine(fL.wl.x + (fL.wr.x - fL.wl.x)*0.2, fL.wl.y, fL_tail.wl.x + (fL_tail.wr.x - fL_tail.wl.x)*0.2, fL_tail.wl.y, colorWaterLine, 1, 0, 0);
+            drawSketchLine(fL.wl.x + (fL.wr.x - fL.wl.x)*0.8, fL.wl.y, fL_tail.wl.x + (fL_tail.wr.x - fL_tail.wl.x)*0.8, fL_tail.wl.y, colorWaterLine, 1, 0, 0);
+        }
+
+        // 5. วาดเส้นสเก็ตช์ผิวน้ำ
+        drawSketchLine(wFront.wl.x, wFront.wl.y, wFront.wr.x, wFront.wr.y, colorWaterLine, 2.5);
+        drawSketchLine(wFront.wl.x, wFront.wl.y, wBack.wl.x, wBack.wl.y, colorWaterLine, 1.5);
+        drawSketchLine(wFront.wr.x, wFront.wr.y, wBack.wr.x, wBack.wr.y, colorWaterLine, 1.5);
+
+        // 6. วาดเส้นสเก็ตช์ร่องน้ำ (ขอบหน้า) ให้เข้มชัดที่สุด
+        drawSketchLine(front.tl.x - 30, front.tl.y, front.tl.x, front.tl.y, colorLine, 2);
+        drawSketchLine(front.tr.x, front.tr.y, front.tr.x + 30, front.tr.y, colorLine, 2);
+        drawSketchLine(front.tl.x, front.tl.y, front.bl.x, front.bl.y, colorLine, 2.5);
+        drawSketchLine(front.bl.x, front.bl.y, front.br.x, front.br.y, colorLine, 2.5);
+        drawSketchLine(front.br.x, front.br.y, front.tr.x, front.tr.y, colorLine, 2.5);
+
+        // 7. สเก็ตช์ Dimension บอกระยะ
+        ctx.fillStyle = '#94a3b8'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+        // เส้นบอกกว้าง (b)
+        drawSketchLine(front.bl.x, front.bl.y + 15, front.br.x, front.br.y + 15, '#94a3b8', 1, 5, 0);
+        ctx.fillText(`b = ${b.toFixed(2)}m`, front.bl.x + (front.br.x - front.bl.x)/2, front.bl.y + 30);
+        // เส้นบอกลึก (h)
+        ctx.textAlign = 'right';
+        drawSketchLine(front.bl.x - 15, front.bl.y, wFront.wl.x - 15, wFront.wl.y, '#94a3b8', 1, 5, 0);
+        ctx.fillText(`h = ${waterH.toFixed(2)}`, wFront.wl.x - 20, wFront.wl.y + (front.bl.y - wFront.wl.y)/2 + 4);
+
+        if(isOverflow) {
+            ctx.fillStyle = '#f87171'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText("⚠️ OVERFLOW!", cx, front.tl.y - 15);
+        }
+
+        requestAnimationFrame(renderFrame); // Loop แอนิเมชัน
+    }
+
+    function updateValues() {
+        const b = parseFloat(slideB.value);
+        const h = parseFloat(slideH.value);
+        const s = parseFloat(slideS.value);
+
+        valB.textContent = b.toFixed(2);
+        valH.textContent = h.toFixed(2);
+        valS.textContent = s.toFixed(1);
+
+        const hydro = calculateHydraulics(b, h, s);
+        currentVelocity = hydro.V; // ส่งค่าความเร็วไปให้ Animation
+        
+        resQ.textContent = hydro.Q.toFixed(3);
+        resV.textContent = hydro.V.toFixed(2);
+        resQ.style.color = (h >= 1.5) ? '#f87171' : '#38bdf8';
+    }
+
+    slideB.addEventListener('input', updateValues);
+    slideH.addEventListener('input', updateValues);
+    slideS.addEventListener('input', updateValues);
+    
+    updateValues(); 
+    renderFrame(); // สตาร์ทเครื่องยนต์กราฟิก
+</script>
+
+</body>
+</html>
